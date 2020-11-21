@@ -7,20 +7,32 @@
         @TempData["Passcode_Alert"]
     </p>
 }
+<style>
+    .container {
+        padding-right: 40px;
+        padding-left: 40Px;
+    }
+</style>
 <h2 class="text-center m-3">Upcoming Test</h2>
 @using (Html.BeginForm("UpcomingTest", "Test", FormMethod.Get))
 {
-<div align="right">
-    @Html.TextBox("SearchBy")
-    @Html.Partial("_SubjectDropDownView", new OnlineAssessmentApplication.ViewModel.SubjectViewModel())
-    @if (HttpContext.Current.User.IsInRole("Teacher") || HttpContext.Current.User.IsInRole("Principal"))
-    {
-        @Html.Partial("_GradeDropDownView", new OnlineAssessmentApplication.ViewModel.GradeViewModel())
-    }
-
-    <input type="submit" value="Filter" class="btn btn-primary" />
-
-</div>
+    <div class="container">
+        <div align="right">
+            <h4>Filters</h4><br />
+            <b>@Html.Label("Search:")</b>
+            @Html.TextBox("SearchBy")
+            <b>@Html.Label("Subject:")</b>
+            @Html.Partial("_SubjectDropDownView", new OnlineAssessmentApplication.ViewModel.SubjectViewModel())
+            @if (HttpContext.Current.User.IsInRole("Teacher") || HttpContext.Current.User.IsInRole("Principal"))
+            {
+                <b>@Html.Label("Grade")</b>
+                @Html.Partial("_GradeDropDownView", new OnlineAssessmentApplication.ViewModel.GradeViewModel())
+            }
+            <button type="submit" class="btn btn-info btn-sm">Filter</button>
+            <br />
+            <br />
+        </div>
+    </div>
 }
 @if (HttpContext.Current.User.IsInRole("Teacher"))
 {
@@ -43,7 +55,7 @@
 
                     @if (HttpContext.Current.User.IsInRole("Student"))
                     {<!-- Button trigger modal -->
-                        if (item.StartTime == DateTime.Now)
+                        if (DateTime.Now >= item.StartTime && DateTime.Now < item.EndTime)
                         {
                             <a role="button" class="btn btn-success" data-toggle="modal" data-target="#myModel">
                                 Take test
@@ -57,7 +69,10 @@
                     else if (HttpContext.Current.User.IsInRole("Teacher"))
                     {
                         <p>@Html.DisplayNameFor(Model => Model.Status): @Html.DisplayFor(modelItem => item.Status)</p>
-                        @Html.ActionLink("Edit", "EditTest", new { testId = item.TestId }, new { @class = "btn btn-primary" })
+                        if (item.Status != "Accepted")
+                        {
+                            @Html.ActionLink("Edit", "EditTest", new { testId = item.TestId }, new { @class = "btn btn-primary" })
+                        }
                         @Html.ActionLink("Delete", "DeleteTest", new { testId = item.TestId }, new { @class = "btn btn-primary" })
                         if (item.Status != "Accepted")
                         {
@@ -104,7 +119,7 @@
             </div>
         </div>
     </div>
-    }
+}
 
 @section scripts{
     <script type="text/javascript">
@@ -119,5 +134,3 @@
         }
     </script>
 }
-
-

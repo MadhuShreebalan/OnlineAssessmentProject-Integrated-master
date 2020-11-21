@@ -74,17 +74,12 @@ namespace OnlineAssessmentApplication.Repository
                 if (HttpContext.Current.User.IsInRole("Student"))
                 {
                     User currentUser = AssessmentDBContext.Users.FirstOrDefault(user => user.Name == userName);
-                    IEnumerable<Test> tests = AssessmentDBContext.Tests.Where(test => test.Grade==currentUser.UserGrade && test.Status.Equals("Accepted") && test.Subject.Equals(filterPanel.SubjectId)&&test.TestName.Contains(filterPanel.SearchBy) ||filterPanel.SearchBy == null|| filterPanel.SubjectId == 0).ToList();
+                    IEnumerable<Test> tests = AssessmentDBContext.Tests.Where(test => (test.Grade == currentUser.UserGrade && test.Status.Equals("Accepted")) && (test.Subject.Equals(filterPanel.SubjectId) || filterPanel.SubjectId == 0) && (test.TestName.Contains(filterPanel.SearchBy) || filterPanel.SearchBy == null)).ToList();
                     return tests;
                 }
-                else if (HttpContext.Current.User.IsInRole("Principal"))
+                else if (HttpContext.Current.User.IsInRole("Principal") || HttpContext.Current.User.IsInRole("Teacher"))
                 {
-                    IEnumerable<Test> tests = AssessmentDBContext.Tests.Where(test=> test.Subject.Equals(filterPanel.SubjectId) && test.Grade.Equals(filterPanel.GradeId) && test.TestName.Contains(filterPanel.SearchBy)|| filterPanel.SearchBy == null || filterPanel.SubjectId == 0).ToList();
-                    return tests;
-                }
-                else if (HttpContext.Current.User.IsInRole("Teacher"))
-                {
-                    IEnumerable<Test> tests = AssessmentDBContext.Tests.Where(test =>test.Subject.Equals(filterPanel.SubjectId) && test.Grade.Equals(filterPanel.GradeId) && test.TestName.Contains(filterPanel.SearchBy)|| filterPanel.SearchBy == null&&filterPanel.GradeId==0||filterPanel.SubjectId==0).ToList();
+                    IEnumerable<Test> tests = AssessmentDBContext.Tests.Where(test => (test.Subject.Equals(filterPanel.SubjectId) || filterPanel.SubjectId == 0) && (test.Grade.Equals(filterPanel.GradeId) || filterPanel.GradeId == 0) && (test.TestName.Contains(filterPanel.SearchBy) || filterPanel.SearchBy == null)).ToList();
                     return tests;
                 }
                 else
@@ -94,12 +89,14 @@ namespace OnlineAssessmentApplication.Repository
             }
         }
 
-        public bool VerifyPasscode(int passcode)
+
+
+            public bool VerifyPasscode(int passcode)
         {
             using (AssessmentDbContext AssessmentDBContext = new AssessmentDbContext())
             {
-                Test verifiedTest = AssessmentDBContext.Tests.Where(test => test.Passcode==passcode).FirstOrDefault();
-                if (verifiedTest!=null)
+                Test verifiedTest = AssessmentDBContext.Tests.Where(test => test.Passcode == passcode).FirstOrDefault();
+                if (verifiedTest != null)
                     return true;
                 else
                     return false;
@@ -112,7 +109,7 @@ namespace OnlineAssessmentApplication.Repository
             using (AssessmentDbContext AssessmentDBContext = new AssessmentDbContext())
             {
                 User currentUser = AssessmentDBContext.Users.FirstOrDefault(user => user.Name == userName);
-                SqlParameter userId = new SqlParameter("@UserId",currentUser.UserId);
+                SqlParameter userId = new SqlParameter("@UserId", currentUser.UserId);
 
                 var resultViewModels = AssessmentDBContext.Database.SqlQuery<ResultViewModel>("SP_CalculateScore @UserId", userId).ToList();
 
