@@ -1,0 +1,11 @@
+﻿@using OnlineAssessmentApplication.ViewModel
+@{
+    IEnumerable<AnswerViewModel> ans = ViewData["answers"] as IEnumerable<AnswerViewModel>;
+}
+
+@foreach (var answer in ans)
+{
+    @Html.RadioButtonFor(model => answer.AnswerDescription, answer.AnswerDescription)@(answer.AnswerDescription)
+    <br />
+
+}

@@ -1,0 +1,81 @@
+﻿@model  IEnumerable<OnlineAssessmentApplication.ViewModel.QuestionViewModel>
+@using OnlineAssessmentApplication.ViewModel
+
+@{
+    ViewBag.Title = "TakeTest";
+    var endTime = DateTime.UtcNow.AddSeconds(10);
+    var timeRemaining = TimeSpan.FromTicks(endTime.Ticks - DateTime.UtcNow.Ticks).TotalSeconds;
+}
+
+<h2>TakeTest</h2>
+<div class="row">
+    <div class="col-md-12" style="flood-color:aqua">
+        <div class="navbar-toggler">
+            <div class="alert-warning">Time Remaining:<span id="minRemaining"></span>:<span id="secRemaining"></span> </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var remSeconds =@timeRemaining;
+    var secondsCounter = (remSeconds % 60);
+    function formatNumber(number) {
+        if (number < 10) return '0' + number;
+        else return '' + number;
+    }
+    function startTick()
+    {
+
+         document.getElementById('secRemaining').innerText = formatNumber(secondsCounter);
+        //document.getElementById('secRemaining').innerText = remSeconds;
+          document.getElementById('minRemaining').innerText = formatNumber(parseInt(remSeconds / 60));
+            var _tick = setInterval(function ()
+            {
+                if (remSeconds > 0)
+                {
+                    remSeconds = remSeconds - 1;
+                    secondsCounter = secondsCounter - 1;
+                    document.getElementById('secRemaining').innerText = formatNumber(secondsCounter);
+                    document.getElementById('minRemaining').innerText = formatNumber(parseInt(remSeconds / 60));
+                    if (secondsCounter == 0)
+                        secondsCounter = 60;
+
+                }
+
+                else if (remSeconds == 0)
+                {
+                    document.forms["Save"].submit();// Form submission
+
+                    //alert('your time has Expired');
+                    clearInterval(_tick);
+                 }
+            }, 1000);
+
+    }
+
+    startTick();
+
+
+</script>
+@{
+    IEnumerable<QuestionViewModel> qns = ViewData["Questions"] as IEnumerable<QuestionViewModel>;
+    IEnumerable<AnswerViewModel> ans = ViewData["answers"] as IEnumerable<AnswerViewModel>;
+
+}
+@using (Html.BeginForm("TakeTest", "Test", FormMethod.Post))
+{
+
+    <div class="col-md-12">
+
+        @foreach (var item in qns)
+        {
+            @Html.DisplayFor(Model => item.Question)<br />
+            @Html.Partial("_AnswerView", new OnlineAssessmentApplication.ViewModel.AnswerViewModel())
+
+        }
+
+        <input type="submit" value="Submit" id="Save" class="btn btn-primary" />
+    </div>
+
+}
+
